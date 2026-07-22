@@ -1,0 +1,15 @@
+# dependencies
+node_modules/
+npm-debug.log*
+yarn-error.log*
+
+# session and database
+tmp/
+database/
+
+# environment
+.env
+
+# OS
+.DS_Store
+Thumbs.db
