@@ -6,8 +6,8 @@ module.exports = {
     prefix: '.',
     botName: '⚡𝐄𝐙𝐄𝐃 𝐗 𝐓𝐄𝐂𝐇',
     version: 'v1.0.0',
-    owner: 'EZED X TECH',
-    sessionName: 'session',
+    owner: 'EZED NYANUGA',
+    sessionName: '/opt/render/project/src/session', // <-- IMPORTANT for free render
     ownerNumber: '254769532338',
     autoTyping: settings.autoTyping || false,
     autoRecording: settings.autoRecording || false,
