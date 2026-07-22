@@ -3,7 +3,7 @@ services:
     name: ezed-x-tech
     env: node
     plan: free
-    buildCommand: npm install && apt-get update && apt-get install -y ffmpeg
+    buildCommand: npm install
     startCommand: npm start
     disk:
       name: session-disk
