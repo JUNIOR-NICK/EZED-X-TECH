@@ -1,0 +1,11 @@
+services:
+    - type: web
+    name: ezed-x-tech
+    env: node
+    plan: free
+    buildCommand: npm install && apt-get update && apt-get install -y ffmpeg
+    startCommand: npm start
+    disk:
+      name: session-disk
+      mountPath: /opt/render/project/src/session
+      sizeGB: 1
