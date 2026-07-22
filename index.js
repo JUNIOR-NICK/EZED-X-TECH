@@ -10,17 +10,17 @@ const PORT = process.env.PORT || 10000
 let latestQR = null
 let isConnected = false
 let startTime = Date.now()
-const messageStore = new Map() // for antidelete
+const messageStore = new Map()
 
 app.get('/', async (req, res) => {
     const runtime = msToTime(Date.now() - startTime)
     res.send(`<body style="background:#0a0a0a;color:white;text-align:center;font-family:sans-serif;padding-top:30px">
         <h1>${config.botName}</h1>
-        ${isConnected? `<h2 style="color:#00ff00">✅ Connected</h2>` : `<h2>Scan QR</h2>${latestQR? `<img src="${latestQR}" width="280"/>` : '<p>Generating...</p>'}`}
+        ${isConnected? `<h2 style="color:#00ff00">✅ Connected</h2><p>Bot is online</p>` : `<h2>Scan QR</h2>${latestQR? `<img src="${latestQR}" width="280"/>` : '<p>Generating... Please wait 5s</p>'}`}
         <p>Runtime: ${runtime}</p>
     </body>`)
 })
-app.listen(PORT)
+app.listen(PORT, () => console.log(`Web: ${PORT}`))
 
 function msToTime(ms) {
     let s = Math.floor(ms/1000), m = Math.floor(s/60), h = Math.floor(m/60), d = Math.floor(h/24)
@@ -28,14 +28,36 @@ function msToTime(ms) {
 }
 
 async function startBot() {
+    // DELETE OLD SESSION IF CORRUPTED - THIS FORCES NEW QR
+    if(fs.existsSync(config.sessionName) &&!isConnected) {
+        console.log("No creds found, waiting for QR...")
+    }
+
     const { state, saveCreds } = await useMultiFileAuthState(config.sessionName)
-    const sock = makeWASocket({ auth: state, logger: pino({level:'silent'}), printQRInTerminal:false })
+    const sock = makeWASocket({ 
+        auth: state, 
+        logger: pino({level:'silent'}), 
+        printQRInTerminal: true // important
+    })
 
     sock.ev.on('creds.update', saveCreds)
     sock.ev.on('connection.update', async (u) => {
-        if(u.qr) { latestQR = await QRCode.toDataURL(u.qr); isConnected = false }
-        if(u.connection === 'open') { latestQR = null; isConnected = true; console.log('Connected') }
-        if(u.connection === 'close') startBot()
+        const { connection, lastDisconnect, qr } = u
+        if(qr) { 
+            console.log("New QR Generated")
+            latestQR = await QRCode.toDataURL(qr) 
+            isConnected = false 
+        }
+        if(connection === 'open') { 
+            latestQR = null
+            isConnected = true
+            console.log('✅ Connected to WhatsApp') 
+        }
+        if(connection === 'close') {
+            const shouldReconnect = lastDisconnect.error?.output?.statusCode!== DisconnectReason.loggedOut
+            console.log('Connection closed. Reconnecting...', shouldReconnect)
+            if(shouldReconnect) startBot()
+        }
     })
 
     // Store messages for antidelete
@@ -44,8 +66,6 @@ async function startBot() {
         if(!m.message || m.key.fromMe) return
         messageStore.set(m.key.id, m)
         setTimeout(() => messageStore.delete(m.key.id), 5 * 60 * 1000)
-
-        // Auto view status
         if(config.autoViewStatus && m.key.remoteJid === 'status@broadcast') {
             await sock.readMessages([m.key])
         }
