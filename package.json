@@ -10,7 +10,7 @@
     "qrcode": "^1.5.3",
     "pino": "^8.17.2",
     "yt-search": "^2.10.4",
-    "yt-dlp-exec": "^3.0.1",
+    "yt-dlp-exec": "^3.0.3",
     "axios": "^1.6.8",
     "moment-timezone": "^0.5.45"
   }
