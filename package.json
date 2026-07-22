@@ -1,0 +1,17 @@
+{
+  "name": "ezed-x-tech",
+  "version": "1.0.0",
+  "description": "EZED X TECH WhatsApp Bot",
+  "main": "index.js",
+  "scripts": { "start": "node index.js" },
+  "dependencies": {
+    "@whiskeysockets/baileys": "^6.7.14",
+    "express": "^4.19.2",
+    "qrcode": "^1.5.3",
+    "pino": "^8.17.2",
+    "yt-search": "^2.10.4",
+    "yt-dlp-exec": "^3.0.1",
+    "axios": "^1.6.8",
+    "moment-timezone": "^0.5.45"
+  }
+}
